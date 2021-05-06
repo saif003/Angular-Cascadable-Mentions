@@ -25,6 +25,9 @@ and content editable fields. Try entering some @names below.</p>
     <h3>Embedded Editor</h3>
     <app-demo-tinymce></app-demo-tinymce>
 
+    <h3>Textarea with IDE like support for selecting variable</h3>
+    <textarea [mentionConfig]="mentionConfig" (searchTerm)="log('searchTerm', $event)" (itemSelected)="log('itemSelected', $event)" class="form-control" cols="60" rows="4"></textarea>
+
 </ng-container>
 
 <!-- other functionaity demos -->

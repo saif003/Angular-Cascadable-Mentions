@@ -3,9 +3,9 @@
 export interface MentionConfig extends Mentions {
   // nested config
   mentions?:Mentions[];
-  
+
   // option to disable encapsulated styles so global styles can be used instead
-  disableStyle?:boolean;  
+  disableStyle?:boolean;
 }
 
 export interface Mentions {
@@ -23,6 +23,16 @@ export interface Mentions {
 
   // option to disable sorting
   disableSort?:boolean;
+
+  hasChildren?: boolean;
+
+  getChildren?: (item:any, triggerChar?:string) => any[];
+
+  childTriggerChar?: string;
+
+  childTriggerRegex?: RegExp;
+
+  parentTriggerChar?: string;
 
   // option to disable internal filtering. can be used to show the full list returned
   // from an async operation

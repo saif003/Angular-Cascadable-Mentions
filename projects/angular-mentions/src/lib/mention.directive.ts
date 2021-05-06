@@ -53,6 +53,9 @@ export class MentionDirective implements OnChanges {
     maxItems: -1,
     allowSpace: false,
     returnTrigger: false,
+    hasChildren: false,
+    childTriggerChar: '.',
+    getChildren: (item) => [],
     mentionSelect: (item: any, triggerChar?: string) => {
       return this.activeConfig.triggerChar + item[this.activeConfig.labelKey];
     },
@@ -112,11 +115,7 @@ export class MentionDirective implements OnChanges {
     }
   }
 
-  // add configuration for a trigger char
-  private addConfig(config: MentionConfig) {
-    // defaults
-    let defaults = Object.assign({}, this.DEFAULT_CONFIG);
-    config = Object.assign(defaults, config);
+  private mapItems(config: MentionConfig) {
     // items
     let items = config.items;
     if (items && items.length > 0) {
@@ -136,10 +135,26 @@ export class MentionDirective implements OnChanges {
         }
       }
     }
-    config.items = items;
+    return items;
+  }
+
+  // add configuration for a trigger char
+  private addConfig(config: MentionConfig) {
+    // defaults
+    let defaults = Object.assign({}, this.DEFAULT_CONFIG);
+    config = Object.assign(defaults, config);
+    config.items = this.mapItems(config);
 
     // add the config
     this.triggerChars[config.triggerChar] = config;
+
+    if (config.hasChildren) {
+      this.triggerChars[config.childTriggerChar] = {
+        ...this.DEFAULT_CONFIG,
+          triggerChar: config.childTriggerChar,
+          parentTriggerChar: config.triggerChar
+      }
+    }
 
     // for async update while menu/search is active
     if (this.activeConfig && this.activeConfig.triggerChar == config.triggerChar) {
@@ -184,6 +199,7 @@ export class MentionDirective implements OnChanges {
     let val: string = getValue(nativeElement);
     let pos = getCaretPosition(nativeElement, this.iframe);
     let charPressed = event.key;
+    const actualVal = [val.slice(0, pos), charPressed, val.slice(pos)].join('');
     if (!charPressed) {
       let charCode = event.which || event.keyCode;
       if (!event.shiftKey && (charCode >= 65 && charCode <= 90)) {
@@ -206,6 +222,29 @@ export class MentionDirective implements OnChanges {
     //console.log("keyHandler", this.startPos, pos, val, charPressed, event);
 
     let config = this.triggerChars[charPressed];
+    if (!config && Object.keys(this.triggerChars).some((k) => k.length > 1)) {
+      for (const key in this.triggerChars) {
+        if (Object.prototype.hasOwnProperty.call(this.triggerChars, key)) {
+          const kLength = key.length;
+          if (actualVal.substr(pos - kLength + 1, kLength) === key) {
+            config = this.triggerChars[key];
+          }
+        }
+      }
+    }
+    if (config?.parentTriggerChar) {
+      const parentConfig = this.triggerChars[config.parentTriggerChar];
+      const activeTriggerValue = actualVal.slice(0, pos);
+      const lastIndex = activeTriggerValue.lastIndexOf(config.parentTriggerChar);
+      const targetItem = lastIndex !== -1 ? activeTriggerValue.slice(lastIndex+config.parentTriggerChar.length) : undefined;
+      if (targetItem && parentConfig.getChildren && parentConfig.childTriggerRegex && parentConfig.childTriggerRegex.test(targetItem)) {
+        config.items = parentConfig.getChildren(targetItem, config.triggerChar);
+        config.items = this.mapItems(config);
+      } else {
+        config.items = [];
+        config = undefined;
+      }
+    }
     if (config) {
       this.activeConfig = config;
       this.startPos = event.inputEvent ? pos - 1 : pos;
@@ -303,7 +342,7 @@ export class MentionDirective implements OnChanges {
           if (this.activeConfig.returnTrigger) {
             const triggerChar = (this.searchString || event.keyCode === KEY_BACKSPACE) ? val.substring(this.startPos, this.startPos + 1) : '';
             this.searchTerm.emit(triggerChar + this.searchString);
-          } 
+          }
           else {
             this.searchTerm.emit(this.searchString);
           }

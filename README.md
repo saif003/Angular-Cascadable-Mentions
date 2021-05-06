@@ -1,3 +1,53 @@
+# Angular Cascadable Mentions
+
+An extension of [dmacfarlane's angular-mentions](https://github.com/dmacfarlane/angular-mentions), with support for multi character triggercharacters and configuring following additional properties/events.
+
+## Additional Custom Properties
+
+<table width="100%">
+	<tr>
+		<th valign="top" colspan="3" align="left"><a href="#props" name="props">Properties</a></th>
+	</tr>
+	<tr>
+		<th valign="top" width="120px" align="left">Property</th>
+		<th valign="top" align="left">Description</th>
+		<th valign="top" width="60px" align="left">Type</th>
+		<th valign="top" width="60px" align="left">Default</th>
+	</tr>
+	<tr>
+		<td valign="top"><code>hasChildren</code></td>
+		<td valign="top">
+			A Boolean representing whether this mention trigger has a linked child trigger as well
+		</td>
+		<td valign="top"><code>true|false</code></td>
+		<td valign="top"><code>false</code></td>
+	</tr>
+	<tr>
+		<td valign="top"><code>childTriggerChar</code></td>
+		<td valign="top">
+			Trigger character of the linked child mention
+		</td>
+		<td valign="top"><code>String</code></td>
+		<td valign="top">.</td>
+	</tr>
+	<tr>
+		<td valign="top"><code>childTriggerRegex</code></td>
+		<td valign="top">
+			A regex which can used to filter out any specific use cases where linked mention should not trigger
+		</td>
+		<td valign="top"><code>RegExp</code></td>
+		<td valign="top"></td>
+	</tr>
+ <tr>
+    <td valign="top"><code>getChildren</code></td>
+    <td valign="top">
+      A callback which receives the parent mention value and expects to get items array in return
+    </td>
+    <td valign="top"><code>(item: any, triggerChar: string) => any[]</code></td>
+    <td valign="top"><code></code></td>
+  </tr>
+</table>
+
 # Angular Mentions
 
 Simple Angular mentions inspired by [Ment.io](https://github.com/jeff-collins/ment.io).
